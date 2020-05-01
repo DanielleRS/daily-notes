@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:daily_notes/model/Annotation.dart';
+import 'package:daily_notes/helper/AnnotationHelper.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -9,6 +11,7 @@ class _HomeState extends State<Home> {
 
   TextEditingController _titleController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
+  var _db = AnnotationHelper();
 
   _displayRegistrationScreen() {
     showDialog(
@@ -43,6 +46,7 @@ class _HomeState extends State<Home> {
               ),
               FlatButton(
                 onPressed: () {
+                  _saveAnnotation();
                   Navigator.pop(context);
                 },
                 child: Text("Salvar"),
@@ -51,6 +55,15 @@ class _HomeState extends State<Home> {
           );
       }
     );
+  }
+
+  _saveAnnotation() async {
+    String title = _titleController.text;
+    String description = _descriptionController.text;
+
+    Annotation annotation = Annotation(title, description, DateTime.now().toString());
+    int result = await _db.saveAnnotation(annotation);
+    print("salvar anotacao: " + result.toString());
   }
 
   @override
