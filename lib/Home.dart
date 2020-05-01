@@ -12,6 +12,7 @@ class _HomeState extends State<Home> {
   TextEditingController _titleController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
   var _db = AnnotationHelper();
+  List<Annotation> _annotation = List<Annotation>();
 
   _displayRegistrationScreen() {
     showDialog(
@@ -57,6 +58,21 @@ class _HomeState extends State<Home> {
     );
   }
 
+  _retrieveNotes() async {
+    List retrieveNotes = await _db.retrieveNotes();
+    List<Annotation> listTemp = List<Annotation>();
+    for(var item in retrieveNotes) {
+      Annotation annotation = Annotation.fromMap(item);
+      listTemp.add(annotation);
+    }
+    setState(() {
+      _annotation = listTemp;
+    });
+    listTemp = null;
+
+    //print("Lista anotacoes: " + retrieveNotes.toString());
+  }
+
   _saveAnnotation() async {
     String title = _titleController.text;
     String description = _descriptionController.text;
@@ -64,6 +80,17 @@ class _HomeState extends State<Home> {
     Annotation annotation = Annotation(title, description, DateTime.now().toString());
     int result = await _db.saveAnnotation(annotation);
     print("salvar anotacao: " + result.toString());
+
+    _titleController.clear();
+    _descriptionController.clear();
+
+    _retrieveNotes();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _retrieveNotes();
   }
 
   @override
@@ -73,12 +100,31 @@ class _HomeState extends State<Home> {
         title: Text("Minhas anotações"),
         backgroundColor: Colors.lightGreen,
       ),
-      body: Container(),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: ListView.builder(
+              itemCount: _annotation.length,
+                itemBuilder: (context, index) {
+                  final annotation = _annotation[index];
+                  return Card(
+                    child: ListTile(
+                      title: Text(annotation.title),
+                      subtitle: Text("${annotation.date} - ${annotation.description}"),
+                    ),
+                  );
+                }
+            ),
+          )
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
           foregroundColor: Colors.white,
           child: Icon(Icons.add),
-          onPressed: _displayRegistrationScreen
+          onPressed: () {
+            _displayRegistrationScreen();
+          }
       ),
     );
   }

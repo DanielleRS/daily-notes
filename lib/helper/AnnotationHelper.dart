@@ -4,6 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 class AnnotationHelper {
   static final String tableName = "annotation";
+
   static final AnnotationHelper _annotationHelper = AnnotationHelper._internal();
   Database _db;
 
@@ -11,9 +12,7 @@ class AnnotationHelper {
     return _annotationHelper;
   }
 
-  AnnotationHelper._internal() {
-
-  }
+  AnnotationHelper._internal() {}
 
   get db async {
     if(_db != null) {
@@ -45,5 +44,12 @@ class AnnotationHelper {
     var database = await db;
     int result = await database.insert(tableName, annotation.toMap());
     return result;
+  }
+
+  retrieveNotes() async {
+    var database = await db;
+    String sql = "SELECT * FROM $tableName ORDER BY date DESC";
+    List annotation = await database.rawQuery(sql);
+    return annotation;
   }
 }
