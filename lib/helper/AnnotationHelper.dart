@@ -52,4 +52,14 @@ class AnnotationHelper {
     List annotation = await database.rawQuery(sql);
     return annotation;
   }
+
+  Future<int> updateAnnotation(Annotation annotation) async {
+    var database = await db;
+    return await database.update(
+      tableName,
+      annotation.toMap(),
+      where: "id = ?",
+      whereArgs: [annotation.id]
+    );
+  }
 }

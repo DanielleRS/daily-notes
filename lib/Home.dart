@@ -16,12 +16,23 @@ class _HomeState extends State<Home> {
   var _db = AnnotationHelper();
   List<Annotation> _annotation = List<Annotation>();
 
-  _displayRegistrationScreen() {
+  _displayRegistrationScreen({Annotation annotation}) {
+    String textSaveUpdate = "";
+    if(annotation == null) { //save
+      _titleController.text = "";
+      _descriptionController.text = "";
+      textSaveUpdate = "Salvar";
+    } else { //update
+      _titleController.text = annotation.title;
+      _descriptionController.text = annotation.description;
+      textSaveUpdate = "Atualizar";
+    }
+
     showDialog(
         context: context,
       builder: (context) {
           return AlertDialog(
-            title: Text("Adicionar anotações"),
+            title: Text("$textSaveUpdate anotações"),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -49,10 +60,10 @@ class _HomeState extends State<Home> {
               ),
               FlatButton(
                 onPressed: () {
-                  _saveAnnotation();
+                  _saveUpdateAnnotation(annotationSelected: annotation);
                   Navigator.pop(context);
                 },
-                child: Text("Salvar"),
+                child: Text(textSaveUpdate),
               )
             ],
           );
@@ -75,13 +86,19 @@ class _HomeState extends State<Home> {
     //print("Lista anotacoes: " + retrieveNotes.toString());
   }
 
-  _saveAnnotation() async {
+  _saveUpdateAnnotation({Annotation annotationSelected}) async {
     String title = _titleController.text;
     String description = _descriptionController.text;
 
-    Annotation annotation = Annotation(title, description, DateTime.now().toString());
-    int result = await _db.saveAnnotation(annotation);
-    print("salvar anotacao: " + result.toString());
+    if(annotationSelected == null) { //save
+      Annotation annotation = Annotation(title, description, DateTime.now().toString());
+      int result = await _db.saveAnnotation(annotation);
+    } else { //update
+      annotationSelected.title = title;
+      annotationSelected.description = description;
+      annotationSelected.date = DateTime.now().toString();
+      int result = await _db.updateAnnotation(annotationSelected);
+    }
 
     _titleController.clear();
     _descriptionController.clear();
@@ -124,6 +141,35 @@ class _HomeState extends State<Home> {
                     child: ListTile(
                       title: Text(annotation.title),
                       subtitle: Text("${_formatDate(annotation.date)} - ${annotation.description}"),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: (){
+                              _displayRegistrationScreen(annotation: annotation);
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(right: 16),
+                              child: Icon(
+                                Icons.edit,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: (){
+
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(right: 0),
+                              child: Icon(
+                                Icons.remove_circle,
+                                color: Colors.red,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   );
                 }
