@@ -117,6 +117,11 @@ class _HomeState extends State<Home> {
     return dateFormat;
   }
 
+  _removeAnnotation(int id) async {
+    await _db.removeAnnotation(id);
+    _retrieveNotes();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -158,7 +163,7 @@ class _HomeState extends State<Home> {
                           ),
                           GestureDetector(
                             onTap: (){
-
+                              _removeAnnotation(annotation.id);
                             },
                             child: Padding(
                               padding: EdgeInsets.only(right: 0),
